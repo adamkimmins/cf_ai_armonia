@@ -1,0 +1,10 @@
+{
+  "name": "cf_ai_armonia",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler publish"
+  },
+  "dependencies": {}
+}
