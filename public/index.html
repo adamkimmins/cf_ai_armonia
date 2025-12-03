@@ -30,7 +30,20 @@
         <h2>Lyric Writer</h2>
 
         <!-- Dialect -->
-        <label>Dialect:</label>
+
+        <div id="dialect-multiselect">
+          <div id="dialect-display">Select Dialect ▾</div>
+          <div id="dialect-dropdown" class="hidden">
+            <div class="dialect-item">American (default)</div>
+            <div class="dialect-item">Bay Area</div>
+            <div class="dialect-item">Western</div>
+            <div class="dialect-item">Southern</div>
+            <div class="dialect-item">Appalachian</div>
+            <div class="dialect-item">Celtic</div>
+          </div>
+        </div>
+
+        <!-- <label>Dialect:</label>
         <select id="dialect-select">
           <option value="Default">Default</option>
           <option value="Appalachian">Appalachian</option>
@@ -40,7 +53,7 @@
           <option value="Cowboy">Cowboy / Western</option>
           <option value="Nashville">Nashville Songwriter</option>
           <option value="New England">New England Folk</option>
-        </select>
+        </select> -->
 
         <!-- Genre Multi-Select -->
         <div id="genre-multiselect" class="multiselect">
@@ -49,13 +62,11 @@
             <div class="item">Pop</div>
             <div class="item">Country</div>
             <div class="item">Retro</div>
-            <div class="item">Old School</div>
-            <div class="item">Jolly</div>
+            <div class="item">Classic Rock</div>
+            <div class="item">Indie Rock</div>
             <div class="item">Bluegrass</div>
             <div class="item">Folk</div>
-            <div class="item">Indie Rock</div>
             <div class="item">Soul</div>
-            <button id="genre-done" class="done hidden">✔ Done</button>
           </div>
         </div>
 

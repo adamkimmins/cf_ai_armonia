@@ -1,47 +1,3 @@
-// let genres = [];
-
-// const dropdown = document.getElementById("genre-dropdown");
-// const display = document.getElementById("genre-display");
-// const doneBtn = document.getElementById("genre-done");
-
-// display.addEventListener("click", () => {
-//   dropdown.classList.toggle("hidden");
-// });
-
-// dropdown.querySelectorAll(".item").forEach(item => {
-//   item.addEventListener("click", () => {
-//     const g = item.textContent;
-
-//     if (genres.includes(g)) {
-//       genres = genres.filter(x => x !== g);
-//       item.classList.remove("selected");
-//     } else if (genres.length < 2) {
-//       genres.push(g);
-//       item.classList.add("selected");
-//     }
-
-//     if (genres.length === 1) {
-//       doneBtn.classList.remove("hidden");
-//     }
-
-//     if (genres.length === 2) {
-//       dropdown.classList.add("hidden");
-//       doneBtn.classList.add("hidden");
-//       updateGenreDisplay();
-//     }
-//   });
-// });
-
-// doneBtn.addEventListener("click", () => {
-//   dropdown.classList.add("hidden");
-//   doneBtn.classList.add("hidden");
-//   updateGenreDisplay();
-// });
-
-// function updateGenreDisplay() {
-//   if (genres.length === 0) display.textContent = "Select Genre ▾";
-//   else display.textContent = "Genres: " + genres.join(", ");
-// }
 /* -------------------------------------------------------
  *  ARMONIA STYLED LYRIC WRITER — FRONTEND LOGIC
  *  Features:
@@ -54,11 +10,13 @@
 
 // Grab DOM elements
 const dialectSelect = document.getElementById("dialect-select");
+const dialectBox = document.getElementById("dialect-multiselect");
+const dialectDisplay = document.getElementById("dialect-display");
+const dialectDropdown = document.getElementById("dialect-dropdown");
 
 const genreMultiselect = document.getElementById("genre-multiselect");
 const genreDisplay = document.getElementById("genre-display");
 const genreDropdown = document.getElementById("genre-dropdown");
-const genreDoneBtn = document.getElementById("genre-done");
 
 const toneSlider = document.getElementById("tone-slider");
 const dictionSlider = document.getElementById("diction-slider");
@@ -74,7 +32,6 @@ if (
   !genreMultiselect ||
   !genreDisplay ||
   !genreDropdown ||
-  !genreDoneBtn ||
   !toneSlider ||
   !dictionSlider ||
   !lyricInput ||
@@ -84,12 +41,52 @@ if (
   console.error("[Armonia LyricAssistant] Missing expected DOM elements. Check IDs in index.html.");
 }
 
-// Current selected genres (0–2)
-let selectedGenres = [];
+
+/* -------------------------------------------------------
+ *  DIALECT SINGLE-SELECT LOGIC
+ * -----------------------------------------------------*/
+
+let selectedDialect = [];
+
+// open / close
+dialectDisplay.addEventListener("click", () => {
+  dialectDropdown.classList.toggle("hidden");
+});
+
+// select
+dialectDropdown.querySelectorAll(".dialect-item").forEach(item => {
+  item.addEventListener("click", () => {
+    // remove old selection
+    dialectDropdown.querySelectorAll(".dialect-item").forEach(i =>
+      i.classList.remove("selected")
+    );
+
+    // mark new selection
+    item.classList.add("selected");
+    selectedDialect = item.textContent.trim();
+
+    // update display
+    dialectDisplay.textContent = selectedDialect;
+
+    // close dropdown
+    dialectDropdown.classList.add("hidden");
+  });
+});
+
+// click outside → close
+document.addEventListener("click", e => {
+  if (!dialectBox.contains(e.target)) {
+    dialectDropdown.classList.add("hidden");
+  }
+});
+
 
 /* -------------------------------------------------------
  *  GENRE MULTISELECT LOGIC
  * -----------------------------------------------------*/
+
+// Current selected genres (0–2)
+let selectedGenres = [];
 
 // Toggle dropdown when clicking the display row
 genreDisplay?.addEventListener("click", () => {
@@ -113,13 +110,6 @@ genreItems.forEach((item) => {
       item.classList.add("selected");
     }
 
-    // Show Done button if exactly one genre selected
-    if (selectedGenres.length === 1) {
-      genreDoneBtn.classList.remove("hidden");
-    } else {
-      genreDoneBtn.classList.add("hidden");
-    }
-
     // If two genres selected, close automatically
     if (selectedGenres.length === 2) {
       closeGenreDropdown();
@@ -129,15 +119,9 @@ genreItems.forEach((item) => {
   });
 });
 
-// Done button: collapse dropdown with one selected genre
-genreDoneBtn?.addEventListener("click", () => {
-  closeGenreDropdown();
-});
-
 // Helper to close dropdown
 function closeGenreDropdown() {
   genreDropdown.classList.add("hidden");
-  genreDoneBtn.classList.add("hidden");
 }
 
 // Update display text based on selection
@@ -145,7 +129,7 @@ function updateGenreDisplay() {
   if (selectedGenres.length === 0) {
     genreDisplay.textContent = "Select Genre ▾";
   } else {
-    genreDisplay.textContent = "Genres: " + selectedGenres.join(", ");
+    genreDisplay.textContent = selectedGenres.join(", ");
   }
 }
 
@@ -233,7 +217,7 @@ async function generateLyrics() {
     return;
   }
 
-  const dialect = dialectSelect.value || "Default";
+  const dialect = selectedDialect || "Default";
   const tone = mapTone(toneSlider.value);
   const diction = mapDiction(dictionSlider.value);
   const genres = [...selectedGenres]; // clone array
