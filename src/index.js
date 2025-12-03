@@ -7,8 +7,12 @@
  *
  * Learn more at https://developers.cloudflare.com/workers/
  */
+// I'm gonna keep this welcome for vibes
 
 import armoniaProtocol from "./prompts/armonia_protocol.txt";
+import helpPrompt from "./prompts/help_mode.txt";
+import writingPrompt from "./prompts/writing_mode.txt";
+import thesaurusPrompt from "./prompts/thesaurus_mode.txt";
 
 const MODEL_ID = "@cf/meta/llama-3.1-8b-instruct";
 
@@ -17,9 +21,13 @@ export default {
     const url = new URL(request.url);
 
     // ---------- HELP CHAT ----------
+
     if (url.pathname === "/chat" && request.method === "POST") {
       const { history, message } = await request.json();
-      const system = makeSystemPrompt("help", {}, armoniaProtocol);
+
+      const system = applyTemplate(helpPrompt, {
+        MODE: "Help"
+      });
 
       const messages = [
         { role: "system", content: system },
@@ -31,105 +39,54 @@ export default {
       return json({ answer: extract(result) });
     }
 
-if (url.pathname === "/lyric" && request.method === "POST") {
-  const data = await request.json();
-
-  const {
-    dialect,
-    genres,
-    tone,
-    diction,
-    message
-  } = data;
-
-  // Build a system prompt from your Armonia protocol
-  const system = `
-You are Armonia-AI, an assistant that writes original lyrics.
-Follow all user style controls strictly.
-
-Dialect: ${dialect}
-Genres: ${genres.join(", ")}
-Tone: ${tone}
-Diction Style: ${diction}
-
-Write lyrics that match all parameters closely.
-`;
-
-  const messages = [
-    { role: "system", content: system },
-    { role: "user", content: message }
-  ];
-
-  const result = await env.AI.run(MODEL_ID, { messages });
-  const output = extract(result);
-
-  return json({ lyrics: output });
-}
-
     //TODO
     // ---------------- LYRIC GENERATOR ROUTE ----------------
-if (url.pathname === "/lyric" && request.method === "POST") {
-  const data = await request.json();
 
-  const {
-    dialect,
-    genres,
-    tone,
-    diction,
-    message
-  } = data;
+    if (url.pathname === "/lyric" && request.method === "POST") {
+      const data = await request.json();
 
-  // Build a system prompt using the Armonia Protocol
-  const system = armoniaProtocol
-    .replace(/{{MODE}}/g, "Writing")
-    .replace(/{{DIALECT}}/g, dialect || "Default")
-    .replace(/{{GENRE}}/g, genres?.join(", ") || "None")
-    .replace(/{{MOOD}}/g, tone || "Neutral")
-    .replace(/{{DICTION}}/g, diction || "Conversational");
-
-  const messages = [
-    { role: "system", content: system },
-    { role: "user", content: message }
-  ];
-
-  let result;
-
-  try {
-    result = await env.AI.run(MODEL_ID, { messages });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.toString() }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
-
-  const output = extract(result);
-  return Response.json({ lyrics: output });
-}
-
-//TODOOO
-
-    // ---------- THESAURUS ----------
-    if (url.pathname === "/synonyms" && request.method === "POST") {
-      const { lines } = await request.json();
-
-      const system = makeSystemPrompt("Thesaurus", {}, armoniaProtocol);
-
-      const msg = lines.map((line, i) => `${i + 1}. ${line}`).join("\n");
+      const system = applyTemplate(writingPrompt, {
+        MODE: "Writing",
+        DIALECT: data.dialect,
+        GENRE: data.genres?.join(", "),
+        TONE: data.tone,
+        DICTION: data.diction
+      });
 
       const messages = [
         { role: "system", content: system },
-        { role: "user", content: `Analyze synonyms by line:\n${msg}` }
+        { role: "user", content: data.message }
+      ];
+
+      const result = await env.AI.run(MODEL_ID, { messages });
+      return json({ lyrics: extract(result) });
+    }
+
+    // ---------- THESAURUS ----------
+    
+    if (url.pathname === "/synonyms" && request.method === "POST") {
+      const { lines } = await request.json();
+
+      const system = applyTemplate(thesaurusPrompt, {
+        MODE: "Thesaurus"
+      });
+
+      const input = lines.map((l,i) => `${i+1}. ${l}`).join("\n");
+
+      const messages = [
+        { role: "system", content: system },
+        { role: "user", content: `Analyze synonyms by line:\n${input}` }
       ];
 
       const result = await env.AI.run(MODEL_ID, { messages });
       return json({ output: extract(result) });
     }
 
+
     // ---------- RHYME ENGINE ----------
 
     if (url.pathname === "/rhyme") {
-      const { target, dialect, genres } = await req.json();
+      const { target, dialect, genres } = request.json();
 
       const system = armoniaProtocol
         .replace(/{{MODE}}/g, "RHYME_ENGINE")
@@ -166,12 +123,20 @@ function json(obj) {
 }
 
 // Build System Prompt
-function makeSystemPrompt(mode, attributes, template) {
+//OLD
+// function makeSystemPrompt(mode, attributes, template) {
+//   return template
+//     .replace("{{MODE}}", mode)
+//     .replace("{{DIALECT}}", attributes.dialect || "Default")
+//     .replace("{{GENRES}}", (attributes.genres || []).join(", "))
+//     .replace("{{TONE}}", attributes.tone || "Neutral")
+//     .replace("{{DICTION}}", attributes.diction || "Conversational")
+// }
+function applyTemplate(template, vars = {}) {
   return template
-    .replace("{{MODE}}", mode)
-    .replace("{{DIALECT}}", attributes.dialect || "Default")
-    .replace("{{GENRES}}", (attributes.genres || []).join(", "))
-    .replace("{{TONE}}", attributes.tone || "Neutral")
-    .replace("{{DICTION}}", attributes.diction || "Conversational")
-    .replace("{{TEMPO}}", attributes.tempo || "Mid");
+    .replace(/{{MODE}}/g, vars.MODE || "Help")
+    .replace(/{{DIALECT}}/g, vars.DIALECT || "American (Default)")
+    .replace(/{{GENRE}}/g, vars.GENRE || "None")
+    .replace(/{{TONE}}/g, vars.TONE || "Neutral")
+    .replace(/{{DICTION}}/g, vars.DICTION || "Conversational");
 }

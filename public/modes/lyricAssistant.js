@@ -1,11 +1,11 @@
 /* -------------------------------------------------------
- *  ARMONIA STYLED LYRIC WRITER — FRONTEND LOGIC
+ *  ARMONIA STYLED LYRIC WRITER - FRONTEND LOGIC
  *  Features:
- *   ✓ Dialect dropdown
- *   ✓ Genre multiselect (0–2 genres)
- *   ✓ Tone / Articulation / Tempo sliders → labels
- *   ✓ Sends to /lyric worker endpoint
- *   ✓ Shows lyrics + basic status messages
+ *   - Dialect dropdown
+ *   - Genre multiselect (0-2 genres)
+ *   - Tone / Articulation / Tempo sliders -> labels
+ *   - Sends to /lyric worker endpoint
+ *   - Shows lyrics + basic status messages
  * -----------------------------------------------------*/
 
 // Grab DOM elements
@@ -73,7 +73,7 @@ dialectDropdown.querySelectorAll(".dialect-item").forEach(item => {
   });
 });
 
-// click outside → close
+// click outside -> close
 document.addEventListener("click", e => {
   if (!dialectBox.contains(e.target)) {
     dialectDropdown.classList.add("hidden");
@@ -85,7 +85,7 @@ document.addEventListener("click", e => {
  *  GENRE MULTISELECT LOGIC
  * -----------------------------------------------------*/
 
-// Current selected genres (0–2)
+// Current selected genres (0-2)
 let selectedGenres = [];
 
 // Toggle dropdown when clicking the display row
@@ -141,15 +141,11 @@ document.addEventListener("click", (event) => {
 });
 
 /* -------------------------------------------------------
- *  SLIDER → LABEL MAPPING
- * -----------------------------------------------------*/
-
-/* -------------------------------------------------------
- *  SLIDER → LABEL MAPPING WITH LIVE UPDATES + SNAPPING
+ *  SLIDER -> LABEL MAPPING
  * -----------------------------------------------------*/
 
 // Snap slider to nearest zone:
-// 0–20, 21–40, 41–60, 61–80, 81–100
+// 0-20, 21-40, 41-60, 61-80, 81-100
 function snap(value) {
   const v = Number(value);
   if (v <= 12) return 0;
@@ -220,7 +216,7 @@ async function generateLyrics() {
   const dialect = selectedDialect || "Default";
   const tone = mapTone(toneSlider.value);
   const diction = mapDiction(dictionSlider.value);
-  const genres = [...selectedGenres]; // clone array
+  const genres = [...selectedGenres]; // clone array !IMPORTANT
 
   lyricOutput.textContent = "Generating lyrics…";
 
@@ -258,7 +254,7 @@ async function generateLyrics() {
 // Bind button click
 lyricGenerateBtn?.addEventListener("click", generateLyrics);
 
-// Optional: allow Ctrl+Enter to generate from textarea
+// Ctrl+Enter generates from textarea
 lyricInput?.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && e.ctrlKey) {
     e.preventDefault();

@@ -1,92 +1,5 @@
-// const chatLog = document.getElementById("chat-log");
-// // const form = document.getElementById("chat-form");
-// const input = document.getElementById("chat-input");
-// // const statusEl = document.getElementById("chat-status");
-// const sendBtn = document.getElementById("chat-send");
-
-// // Keep conversation on the client; we send it to the Worker each turn.
-// const history = []; 
-
-// function appendMessage(role, text) {
-//     const row = document.createElement("div");
-//     row.className = `msg-row ${role}`;
-
-//     const bubble = document.createElement("div");
-//     bubble.className = "msg-bubble";
-//     bubble.textContent = text;
-
-//     row.appendChild(bubble);
-//     chatLog.appendChild(row);
-//     chatLog.scrollTop = chatLog.scrollHeight;
-// }
-
-// async function sendMessage(message) {
-//     statusEl.textContent = "Thinking…";
-//     sendBtn.disabled = true;
-
-//     try {
-//         const resp = await fetch("/chat", {
-//             method: "POST",
-//             headers: { "Content-Type": "application/json" },
-//             body: JSON.stringify({ history, message }),
-//         });
-
-//         if (!resp.ok) {
-//             const errText = await resp.text();
-//             statusEl.textContent = "Error from worker.";
-//             console.error("Chat error:", errText);
-//             return;
-//         }
-
-//         const data = await resp.json();
-//         const answer = data.answer ?? "[No answer field returned]";
-
-//         // Update history we send on subsequent turns
-//         history.push({ role: "user", content: message });
-//         history.push({ role: "assistant", content: answer });
-
-//         appendMessage("assistant", answer);
-//         statusEl.textContent = "";
-//     } catch (err) {
-//         console.error(err);
-//         statusEl.textContent = "Network error.";
-//     } finally {
-//         sendBtn.disabled = false;
-//     }
-// }
-
-// // Initial heading from /message (optional, but mirrors the old example)
-// fetch("/message")
-//     .then((resp) => resp.text())
-//     .then((text) => {
-//         if (text && text.trim()) {
-//             headingEl.textContent = text;
-//         }
-//     })
-//     .catch(() => { });
-
-// // Start with a friendly assistant greeting
-// appendMessage(
-//     "assistant",
-//     "Hey! I’m Armonia’s built-in assistant. Ask me about recording, mixing, or how to structure your song."
-// );
-
-// form.addEventListener("submit", (event) => {
-//     event.preventDefault();
-//     const value = input.value.trim();
-//     if (!value) return;
-
-//     input.value = "";
-//     appendMessage("user", value);
-//     sendMessage(value);
-// });
-
 /* -------------------------------------------------------
- *  ARMONIA HELP CHAT — ENHANCED VERSION
- *  Features:
- *   ✓ Animated typing indicator
- *   ✓ Auto-expanding input field
- *   ✓ Scrollable chat with history trimming (25 max)
+ *  ARMONIA HELP CHAT
  * -----------------------------------------------------*/
 
 // DOM references
@@ -122,7 +35,7 @@ function helpAppend(role, text) {
 
   const bubble = document.createElement("div");
   bubble.className = "msg-bubble";
-  bubble.textContent = text;
+  bubble.innerHTML = renderMarkdown(text);
 
   row.appendChild(bubble);
   helpLog.appendChild(row);
@@ -153,28 +66,11 @@ function trimHistoryUI() {
  *  Show / hide typing indicator
  * -----------------------------------------------------*/
 function showTypingIndicator() {
-  // if (typingIndicator) return; // already exists
-
-  // typingIndicator = document.createElement("div");
-  // typingIndicator.className = "msg-row assistant";
-
-  // const bubble = document.createElement("div");
-  // bubble.className = "msg-bubble";
-  // bubble.innerHTML = `
-  //   <span class="typing-dot"></span>
-  //   <span class="typing-dot"></span>
-  //   <span class="typing-dot"></span>
-  // `;
-
-  // typingIndicator.appendChild(bubble);
-  // helpLog.appendChild(typingIndicator);
-
-  // scrollChatToBottom();
   const typing = document.createElement("div");
     typing.classList.add("msg-row", "assistant");
     typing.id = "typing-indicator";
     typing.innerHTML = `
-        <div class="msg-bubble">
+        <div class="msg-bubble typing-bubble">
             <div class="typing-dots">
                 <span class="typing-dot"></span>
                 <span class="typing-dot"></span>
@@ -249,7 +145,7 @@ helpSend?.addEventListener("click", () => {
   helpSendMessage(msg);
 });
 
-// ENTER to send
+// ENTER to send, SHIFT+ENTER for newline
 helpInput?.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -262,5 +158,5 @@ helpInput?.addEventListener("keydown", (e) => {
  * -----------------------------------------------------*/
 helpAppend(
   "assistant",
-  "Hey! I'm Armonia’s help assistant. Ask me about recording, mixing, arranging, or how to use any feature!"
+  "Hey! I'm Armonia’s help assistant. Ask me about recording or how to use any feature!"
 );

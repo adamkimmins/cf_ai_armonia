@@ -1,5 +1,5 @@
 /* -------------------------------------------------------
- *  ARMONIA THESAURUS TOOL — FRONTEND LOGIC (Simplified)
+ *  ARMONIA THESAURUS TOOL - FRONTEND LOGIC (Simplified)
  *  Features:
  *    Line-numbered textarea (counts wrapped + blank lines)
  *    Auto-comma on Enter for user-created lines only
@@ -259,7 +259,18 @@ function formatSynonymResponse(data) {
 }
 
 /* -------------------------------------------------------
- *  Send to Worker → Display Output
+ *  Keyboard Shortcuts
+ * -----------------------------------------------------*/
+
+lyricInput?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.ctrlKey) {
+    e.preventDefault();
+    analyzeSynonyms();
+  }
+});
+
+/* -------------------------------------------------------
+ *  Send to Worker -> Display Output
  * -----------------------------------------------------*/
 async function analyzeSynonyms() {
   const text = synInput.value.trim();
@@ -296,36 +307,3 @@ async function analyzeSynonyms() {
 
 // For the Analyze Synonyms button
 synButton?.addEventListener("click", analyzeSynonyms);
-
-/* -------------------------------------------------------
- *  Minimal Markdown renderer (kept as-is)
- * -----------------------------------------------------*/
-function renderMarkdown(md) {
-  if (!md) return "";
-
-  let html = md;
-
-  // Bold **text**
-  html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-
-  // Italic *text*
-  html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
-
-  // Headings (#, ##, ###)
-  html = html.replace(/^### (.*$)/gim, "<h3>$1</h3>");
-  html = html.replace(/^## (.*$)/gim, "<h2>$1</h2>");
-  html = html.replace(/^# (.*$)/gim, "<h1>$1</h1>");
-
-  // Numbered lists
-  html = html.replace(/^\s*\d+\.\s+(.*)$/gim, "<li>$1</li>");
-  html = html.replace(/(<li>.*<\/li>)/gim, "<ol>$1</ol>");
-
-  // Bullet lists
-  html = html.replace(/^\s*-\s+(.*)$/gim, "<li>$1</li>");
-  html = html.replace(/(<li>.*<\/li>)/gim, "<ul>$1</ul>");
-
-  // Line breaks → <br>
-  html = html.replace(/\n/g, "<br>");
-
-  return html.trim();
-}
